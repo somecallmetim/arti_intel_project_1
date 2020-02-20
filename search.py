@@ -17,7 +17,20 @@ In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
 
-import util
+import util, copy, time
+from game import Directions
+
+s = Directions.SOUTH
+w = Directions.WEST
+n = Directions.NORTH
+e = Directions.EAST
+
+directions = {
+    'North': Directions.NORTH,
+    'South': Directions.SOUTH,
+    'West': Directions.WEST,
+    'East': Directions.EAST
+}
 
 class SearchProblem:
     """
@@ -67,10 +80,23 @@ def tinyMazeSearch(problem):
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
     sequence of moves will be incorrect, so only use this for tinyMaze.
     """
-    from game import Directions
-    s = Directions.SOUTH
-    w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    import time
+    import inspect
+    print("\n\nStart:", problem.getStartState())
+    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    print("\n\n")
+
+    state = problem.getStartState()
+    print('caller name:', inspect.stack()[1][3])
+    print("\n\n")
+    # print("test: ", type(problem.getSuccessors(state)))
+    print("test: ", type(problem))
+
+    print("\n\n")
+    time.sleep(5)
+
+    return  [s, s, w, s, w, w, s, n, s, n, s, n, s, n, s, w]
 
 def depthFirstSearch(problem):
     """
@@ -86,8 +112,56 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    frontier = util.Stack()
+    currentPosition = problem.getStartState()
+
+    # nodes on the stack => [position, [pathWeTookToNode]]
+        # parentNode will be used to retrieve children nodes and help construct their data (ie path taken)
+    parentNode = 0
+    alreadyVisited = []
+
+    while not problem.isGoalState(currentPosition):
+        # prevent program from getting stuck in infinite cycle by tracking nodes we've already visited
+        alreadyVisited.append(currentPosition)
+
+        # pull node from top of stack if possible, otherwise setup/find child nodes based on start state
+        if not frontier.isEmpty():
+            # pull top node of the frontier off the stack
+            parentNode = frontier.pop()
+            # get position from parentNode
+            currentPosition = parentNode[0]
+
+            # check if we've found the cookie
+            if problem.isGoalState(currentPosition):
+                break
+
+            # get list of triples that have the data we need to create child nodes [((x, y), 'direction', cost), ... ]
+            successorStates = problem.getSuccessors(currentPosition)
+        else:
+            # if stack is empty, we get currentPosition from start state. It's already set
+            successorStates = problem.getSuccessors(currentPosition)
+
+        # setup & push child nodes onto the stack
+        for successor in successorStates:
+            # make sure successor isn't a node we've already been to
+            if successor[0] != currentPosition and successor[0] not in alreadyVisited:
+                # check if we actually got parentNode off stack or are at the start state (ie no nodes yet)
+                if parentNode != 0:
+                    currentPath = copy.deepcopy(parentNode[1])
+                else:
+                    currentPath = []
+                # construct child node, which will be pushed on stack
+                node = [None]*2
+                # I want to store each successor in the frontier stack as [position, [pathWeTookToNode]]
+                    # set child node's postion
+                node[0] = successor[0]
+                    # set child node's path
+                currentPath.append(directions[successor[1]])
+                node[1] = currentPath
+                frontier.push(node)
+    # return list of directions needed to get to the cookie
+    return parentNode[1]
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
