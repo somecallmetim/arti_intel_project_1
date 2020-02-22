@@ -141,6 +141,61 @@ def depthFirstSearch(problem):
         else:
             # if stack is empty, we get currentPosition from start state. It's already set
             successorStates = problem.getSuccessors(currentPosition)
+        print("")
+        # setup & push child nodes onto the stack
+        for successor in successorStates:
+            print(successor)
+            # make sure successor isn't a node we've already been to
+            if successor[0] != currentPosition and successor[0] not in alreadyVisited:
+                # check if we actually got parentNode off stack or are at the start state (ie no nodes yet)
+                if parentNode != 0:
+                    currentPath = copy.deepcopy(parentNode[1])
+                else:
+                    currentPath = []
+                # construct child node, which will be pushed on stack
+                node = [None]*2
+                # I want to store each successor in the frontier stack as [position, [pathWeTookToNode]]
+                    # set child node's postion
+                node[0] = successor[0]
+                    # set child node's path
+                currentPath.append(directions[successor[1]])
+                node[1] = currentPath
+                frontier.push(node)
+                print("")
+    # return list of directions needed to get to the cookie
+    return parentNode[1]
+
+def breadthFirstSearch(problem):
+    """Search the shallowest nodes in the search tree first."""
+
+    frontier = util.Queue()
+    currentPosition = problem.getStartState()
+
+    # nodes on the stack => [position, [pathWeTookToNode]]
+        # parentNode will be used to retrieve children nodes and help construct their data (ie path taken)
+    parentNode = 0
+    alreadyVisited = []
+
+    while not problem.isGoalState(currentPosition):
+        # prevent program from getting stuck in infinite cycle by tracking nodes we've already visited
+        alreadyVisited.append(currentPosition)
+
+        # pull node from top of stack if possible, otherwise setup/find child nodes based on start state
+        if not frontier.isEmpty():
+            # pull top node of the frontier off the stack
+            parentNode = frontier.pop()
+            # get position from parentNode
+            currentPosition = parentNode[0]
+
+            # check if we've found the cookie
+            if problem.isGoalState(currentPosition):
+                break
+
+            # get list of triples that have the data we need to create child nodes [((x, y), 'direction', cost), ... ]
+            successorStates = problem.getSuccessors(currentPosition)
+        else:
+            # if stack is empty, we get currentPosition from start state. It's already set
+            successorStates = problem.getSuccessors(currentPosition)
 
         # setup & push child nodes onto the stack
         for successor in successorStates:
@@ -162,11 +217,6 @@ def depthFirstSearch(problem):
                 frontier.push(node)
     # return list of directions needed to get to the cookie
     return parentNode[1]
-
-def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
