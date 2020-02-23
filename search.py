@@ -141,10 +141,9 @@ def depthFirstSearch(problem):
         else:
             # if stack is empty, we get currentPosition from start state. It's already set
             successorStates = problem.getSuccessors(currentPosition)
-        print("")
+
         # setup & push child nodes onto the stack
         for successor in successorStates:
-            print(successor)
             # make sure successor isn't a node we've already been to
             if successor[0] != currentPosition and successor[0] not in alreadyVisited:
                 # check if we actually got parentNode off stack or are at the start state (ie no nodes yet)
@@ -161,7 +160,7 @@ def depthFirstSearch(problem):
                 currentPath.append(directions[successor[1]])
                 node[1] = currentPath
                 frontier.push(node)
-                print("")
+
     # return list of directions needed to get to the cookie
     return parentNode[1]
 
@@ -171,7 +170,7 @@ def breadthFirstSearch(problem):
     frontier = util.Queue()
     currentPosition = problem.getStartState()
 
-    # nodes on the stack => [position, [pathWeTookToNode]]
+    # nodes on the queue => [position, [pathWeTookToNode]]
         # parentNode will be used to retrieve children nodes and help construct their data (ie path taken)
     parentNode = 0
     alreadyVisited = []
@@ -180,9 +179,9 @@ def breadthFirstSearch(problem):
         # prevent program from getting stuck in infinite cycle by tracking nodes we've already visited
         alreadyVisited.append(currentPosition)
 
-        # pull node from top of stack if possible, otherwise setup/find child nodes based on start state
+        # pull node from top of queue if possible, otherwise setup/find child nodes based on start state
         if not frontier.isEmpty():
-            # pull top node of the frontier off the stack
+            # pull top node of the frontier off the queue
             parentNode = frontier.pop()
             # get position from parentNode
             currentPosition = parentNode[0]
@@ -194,21 +193,21 @@ def breadthFirstSearch(problem):
             # get list of triples that have the data we need to create child nodes [((x, y), 'direction', cost), ... ]
             successorStates = problem.getSuccessors(currentPosition)
         else:
-            # if stack is empty, we get currentPosition from start state. It's already set
+            # if queue is empty, we get currentPosition from start state. It's already set
             successorStates = problem.getSuccessors(currentPosition)
 
-        # setup & push child nodes onto the stack
+        # setup & push child nodes onto the queue
         for successor in successorStates:
             # make sure successor isn't a node we've already been to
             if successor[0] != currentPosition and successor[0] not in alreadyVisited:
-                # check if we actually got parentNode off stack or are at the start state (ie no nodes yet)
+                # check if we actually got parentNode off queue or are at the start state (ie no nodes yet)
                 if parentNode != 0:
                     currentPath = copy.deepcopy(parentNode[1])
                 else:
                     currentPath = []
-                # construct child node, which will be pushed on stack
+                # construct child node, which will be pushed onto the queue
                 node = [None]*2
-                # I want to store each successor in the frontier stack as [position, [pathWeTookToNode]]
+                # I want to store each successor in the frontier queue as [position, [pathWeTookToNode]]
                     # set child node's postion
                 node[0] = successor[0]
                     # set child node's path
@@ -220,8 +219,63 @@ def breadthFirstSearch(problem):
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.PriorityQueue()
+    currentPosition = problem.getStartState()
+
+    # nodes on the queue => [position, [pathWeTookToNode], cost]
+        # parentNode will be used to retrieve children nodes and help construct their data (ie path taken)
+    parentNode = 0
+    alreadyVisited = []
+
+    while not problem.isGoalState(currentPosition):
+        # prevent program from getting stuck in infinite cycle by tracking nodes we've already visited
+        alreadyVisited.append(currentPosition)
+
+        # pull node from top of queue if possible, otherwise setup/find child nodes based on start state
+        if not frontier.isEmpty():
+            # pull top node of the frontier off the queue
+            parentNode = frontier.pop()
+
+            # get position from parentNode
+            currentPosition = parentNode[0]
+
+            # check if we've found the cookie
+            if problem.isGoalState(currentPosition):
+                break
+
+            # get list of triples that have the data we need to create child nodes [((x, y), 'direction', cost), ... ]
+            successorStates = problem.getSuccessors(currentPosition)
+        else:
+            # if queue is empty, we get currentPosition from start state. It's already set
+            successorStates = problem.getSuccessors(currentPosition)
+
+        # setup & push child nodes onto the queue
+        for successor in successorStates:
+            # make sure successor isn't a node we've already been to
+            if successor[0] != currentPosition and successor[0] not in alreadyVisited:
+                # check if we actually got parentNode off queue or are at the start state (ie no nodes yet)
+                if parentNode != 0:
+                    currentPath = copy.deepcopy(parentNode[1])
+                else:
+                    currentPath = []
+                # construct child node, which will be pushed onto the queue
+                node = [None]*3
+                # I want to store each successor in the frontier queue as [position, [pathWeTookToNode], cumulativeBranchCost]
+                    # set child node's postion
+                node[0] = successor[0]
+                    # set child node's path
+                currentPath.append(directions[successor[1]])
+                node[1] = currentPath
+                # add previous node's cost (if there was one) to current node, otherwise set cost as current node's cost
+                if parentNode != 0:
+                    cumulativeBranchCost = parentNode[2] + successor[2]
+                    node[2] = cumulativeBranchCost
+                else:
+                    cumulativeBranchCost = successor[2]
+                    node[2] = cumulativeBranchCost
+                frontier.push(node, cumulativeBranchCost)
+    # return list of directions needed to get to the cookie
+    return parentNode[1]
 
 def nullHeuristic(state, problem=None):
     """
@@ -232,8 +286,63 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.PriorityQueue()
+    currentPosition = problem.getStartState()
+
+    # nodes on the queue => [position, [pathWeTookToNode], cost]
+        # parentNode will be used to retrieve children nodes and help construct their data (ie path taken)
+    parentNode = 0
+    alreadyVisited = []
+
+    while not problem.isGoalState(currentPosition):
+        # prevent program from getting stuck in infinite cycle by tracking nodes we've already visited
+        alreadyVisited.append(currentPosition)
+
+        # pull node from top of queue if possible, otherwise setup/find child nodes based on start state
+        if not frontier.isEmpty():
+            # pull top node of the frontier off the queue
+            parentNode = frontier.pop()
+
+            # get position from parentNode
+            currentPosition = parentNode[0]
+
+            # check if we've found the cookie
+            if problem.isGoalState(currentPosition):
+                break
+
+            # get list of triples that have the data we need to create child nodes [((x, y), 'direction', cost), ... ]
+            successorStates = problem.getSuccessors(currentPosition)
+        else:
+            # if queue is empty, we get currentPosition from start state. It's already set
+            successorStates = problem.getSuccessors(currentPosition)
+
+        # setup & push child nodes onto the queue
+        for successor in successorStates:
+            # make sure successor isn't a node we've already been to
+            if successor[0] != currentPosition and successor[0] not in alreadyVisited:
+                # check if we actually got parentNode off queue or are at the start state (ie no nodes yet)
+                if parentNode != 0:
+                    currentPath = copy.deepcopy(parentNode[1])
+                else:
+                    currentPath = []
+                # construct child node, which will be pushed onto the queue
+                node = [None]*3
+                # I want to store each successor in the frontier queue as [position, [pathWeTookToNode], heuristicPlusBranchCostSoFar]
+                    # set child node's postion
+                node[0] = successor[0]
+                    # set child node's path
+                currentPath.append(directions[successor[1]])
+                node[1] = currentPath
+                # add previous node's cost (if there was one) to current node, otherwise set cost as current node's cost
+                if parentNode != 0:
+                    heuristicPlusBranchCostSoFar = parentNode[2] + successor[2] + heuristic(currentPosition, problem)
+                    node[2] = heuristicPlusBranchCostSoFar
+                else:
+                    heuristicPlusBranchCostSoFar = successor[2] + heuristic(currentPosition, problem)
+                    node[2] = heuristicPlusBranchCostSoFar
+                frontier.push(node, heuristicPlusBranchCostSoFar)
+    # return list of directions needed to get to the cookie
+    return parentNode[1]
 
 
 # Abbreviations
