@@ -157,7 +157,7 @@ def depthFirstSearch(problem):
                     # set child node's postion
                 node[0] = successor[0]
                     # set child node's path
-                currentPath.append(directions[successor[1]])
+                currentPath.append(successor[1])
                 node[1] = currentPath
                 frontier.push(node)
 
@@ -211,7 +211,7 @@ def breadthFirstSearch(problem):
                     # set child node's postion
                 node[0] = successor[0]
                     # set child node's path
-                currentPath.append(directions[successor[1]])
+                currentPath.append(successor[1])
                 node[1] = currentPath
                 frontier.push(node)
     # return list of directions needed to get to the cookie
