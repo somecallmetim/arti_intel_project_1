@@ -145,7 +145,7 @@ def depthFirstSearch(problem):
         # setup & push child nodes onto the stack
         for successor in successorStates:
             # make sure successor isn't a node we've already been to
-            if successor[0] != currentPosition and successor[0] not in alreadyVisited:
+            if successor[0] not in alreadyVisited:
                 # check if we actually got parentNode off stack or are at the start state (ie no nodes yet)
                 if parentNode != 0:
                     currentPath = copy.deepcopy(parentNode[1])
@@ -199,7 +199,7 @@ def breadthFirstSearch(problem):
         # setup & push child nodes onto the queue
         for successor in successorStates:
             # make sure successor isn't a node we've already been to
-            if successor[0] != currentPosition and successor[0] not in alreadyVisited:
+            if successor[0] not in alreadyVisited and successor[0] not in (node[0] for node in frontier.list):
                 # check if we actually got parentNode off queue or are at the start state (ie no nodes yet)
                 if parentNode != 0:
                     currentPath = copy.deepcopy(parentNode[1])
